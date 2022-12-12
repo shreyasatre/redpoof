@@ -247,10 +247,6 @@ def make_config():
     config.set("reddit", "client_secret", "")
     config.set("reddit", "user_agent", "")
 
-    config.add_section("options")
-    config.set("options", "export_html", "no")
-    config.set("options", "dark_mode", "no")
-
     try:
         with open("config.ini", "w") as configfile:
             config.write(configfile)
