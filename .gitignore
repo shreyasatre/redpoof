@@ -8,3 +8,6 @@
 config.ini
 
 exported/
+dist/
+build/
+redpoof.spec
