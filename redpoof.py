@@ -209,7 +209,7 @@ def get_window_layout():
     # Layout for gui window.
     layout = [  [sg.Text("Links to reddit posts")],
                 [sg.Multiline(key="-INPUTURLS-", tooltip=" One link per line ", size=(73,10), autoscroll=True)], 
-                [sg.Push(), sg.Button("Go"), sg.Button("Cancel")],
+                [sg.Push(), sg.Button("Download"), sg.Button("Exit")],
                 [sg.Multiline("", size=(85,3), key="-MESSAGE-", 
                  disabled=True, autoscroll=True, background_color="#eee", font=("Consolas", 8))] ]
 
@@ -309,7 +309,7 @@ def make_html(reddit_post:RedditPost):
 
     # content
     div_selftext = div(_class="selftext")
-    div_selftext.add(raw(markdown.markdown(reddit_post.selftext)))
+    div_selftext.add(raw(markdown.markdown(reddit_post.selftext, extensions=["tables"])))
 
     d += div_selftext
 
@@ -398,8 +398,8 @@ def main():
     while True:
         event, values = window.read()
         
-        if event == sg.WIN_CLOSED or event == "Cancel": 
-            # if user closes window or clicks cancel.
+        if event == sg.WIN_CLOSED or event == "Exit": 
+            # if user closes window or clicks Exit.
             break
         
         post_urls_array = values["-INPUTURLS-"].splitlines()

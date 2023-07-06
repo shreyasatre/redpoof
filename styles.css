@@ -149,8 +149,8 @@ table {
   display: block;
 }
 th, td {
-  border-bottom: 1px solid lightgray;
-  padding: 1em 3em 1em 0;
+  border: 1px solid lightgray;
+  padding: 1em 3em 1em 1em;
 }
 header {
   margin-bottom: 6em;
