@@ -232,6 +232,24 @@ ul.task-list{list-style: none;}
   margin-right: 8px;
 }
 
+.comment-votes {
+	font-weight: normal;
+	font-size: smaller;
+	margin-right: 2px;
+}
+
+.comment-votes::before {
+	content: "[";
+	margin-left: 2px;
+	margin-right: 2px;
+}
+
+.comment-votes::after {
+	content: "]";
+	margin-left: 2px;
+	margin-right: 8px;
+}
+
 .selftext {
   border: var(--text-color) dashed 1px;
   padding: 1em;
