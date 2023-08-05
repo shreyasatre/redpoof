@@ -22,6 +22,8 @@ class RedditPost:
         self.sub_name = ""
         self.sub_url = ""
         self.timestamp = ""
+        self.score = 0
+        self.upvote_ratio = 0
     # ---
 # ---
 
@@ -91,6 +93,13 @@ def get_icons_svg(type="user"):
                                 20.85A4.85,4.85 0 0,0 20.85,16C20.85,13.32 18.68,11.15 16,11.15Z" />
                             </svg>"""
 
+    svg_thumb_up = """<svg style="width:24px;height:24px" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M3 7H1a1 1 0 0 0-1 1v8a2 2 0 0 0 4 0V8a1 
+                                1 0 0 0-1-1Zm12.954 0H12l1.558-4.5a1.778 1.778 0 0 0-3.331-1.06A24.859 
+                                24.859 0 0 1 6 6.8v9.586h.114C8.223 16.969 11.015 18 13.6 18c1.4 0 
+                                1.592-.526 1.88-1.317l2.354-7A2 2 0 0 0 15.954 7Z"/>
+                            </svg>"""
+    
     if type == "user":
         return svg_user
     elif type == "tag":
@@ -103,6 +112,8 @@ def get_icons_svg(type="user"):
         return svg_reddit
     elif type == "calendar_clock":
         return svg_calendar_clock
+    elif type == "thumb_up":
+        return svg_thumb_up
 # ---
 
 # Gets comment details.
@@ -118,7 +129,7 @@ def get_comment_details(comment, depth=0):
         comment_author_name = comment.author.name
         comment_author_profile = "https://www.reddit.com/user/" + comment_author_name
 
-    yield comment_author_name, comment_author_profile, comment.created, comment.body, depth
+    yield comment_author_name, comment_author_profile, comment.created, comment.body, depth, comment.score
     for reply in comment.replies:
         yield from get_comment_details(reply, depth + 1)
 # ---
@@ -157,6 +168,7 @@ def get_reddit_instance():
 # Creates a detailed post object.
 def get_post_details(post_url, submission):
     reddit_post = RedditPost()
+    all_comments = []
 
     post_author_name = ""
     if submission.author == None:
@@ -170,6 +182,9 @@ def get_post_details(post_url, submission):
     if submission.num_comments > 0:
         all_comments = get_post_comments(submission)
 
+    if all_comments is None:
+        all_comments = []
+
     reddit_post.title = submission.title
     reddit_post.url = post_url
     reddit_post.author_name = post_author_name
@@ -179,6 +194,8 @@ def get_post_details(post_url, submission):
     reddit_post.sub_name = "r/" + str(submission.subreddit.display_name)
     reddit_post.sub_url = "https://www.reddit.com/r/" + submission.subreddit.display_name
     reddit_post.timestamp = str(get_post_date(submission))
+    reddit_post.score = submission.score
+    reddit_post.upvote_ratio = submission.upvote_ratio
 
     return reddit_post
 # ---
@@ -280,7 +297,7 @@ def make_html(reddit_post:RedditPost):
 
     # title
     div_title = div(_class="title")
-    div_title.add(h1(a(reddit_post.title, href=reddit_post.url)))
+    div_title.add(h1(a(reddit_post.title, href=reddit_post.url, target="_blank")))
     d += div_title
 
     div_details = div(_class="details")
@@ -300,9 +317,15 @@ def make_html(reddit_post:RedditPost):
     div_timestamp += span(raw(get_icons_svg("calendar_clock")), _class="item-icon")
     div_timestamp += span(reddit_post.timestamp, _class="item-text")
 
+    # score
+    div_score = span(_class="item")
+    div_score += span(raw(get_icons_svg("thumb_up")), _class="item-icon")
+    div_score += span(str(reddit_post.score) + " @ " + str(reddit_post.upvote_ratio) + "%", _class="item-text")
+
     div_details.add(div_author)
     div_details.add(div_subreddit)
     div_details.add(div_timestamp)
+    div_details.add(div_score)
 
     # details
     d += div_details
@@ -326,6 +349,7 @@ def make_html(reddit_post:RedditPost):
         comment_timestamp = comment[2]
         comment_body = comment[3]
         comment_depth = comment[4]
+        comment_score = comment[5]
 
         comment_created_at = str(datetime.datetime.fromtimestamp(comment_timestamp))
 
@@ -339,9 +363,11 @@ def make_html(reddit_post:RedditPost):
             comment_author_op = ""
 
         div_comment_author = span(a(comment_author_name + comment_author_op, href=comment_author_profile, target="_blank"), _class="comment-author")
+        div_comment_votes = span(comment_score, _class="comment-votes")
         div_comment_timestamp = span(comment_created_at, _class="comment-timestamp")
 
         div_comment_details.add(div_comment_author)
+        div_comment_details.add(div_comment_votes)
         div_comment_details.add(div_comment_timestamp)
 
         div_comment_text = div(raw(markdown.markdown(comment_body)))
@@ -393,6 +419,7 @@ def main():
     window = sg.Window("Download reddit post", get_window_layout(), finalize=True)
     message = window["-MESSAGE-"]
     message.update("Ready...")
+    window.refresh()
 
     # Event loop to process "events" and get the "values" of the inputs
     while True:
@@ -405,32 +432,47 @@ def main():
         post_urls_array = values["-INPUTURLS-"].splitlines()
 
         if len(post_urls_array) == 0:
-            window["-MESSAGE-"].update("Enter link(s) to reddit posts")
+            message.update("Enter link(s) to reddit posts")
+            window.refresh()
         else:
             try:
+                message.update(message.get() + "\nFound " + str(len(post_urls_array)) + " link(s)")
+                window.refresh()
+               
                 for i in range(0, len(post_urls_array)):
                     file_name = process_url(post_urls_array[i])
                     if file_name == None:
                         message.update(message.get() + "\nUnexpected error. Please check config.ini for valid values.")
+                        window.refresh()
                     else:
-                        message.update(message.get() + "\nExported: " + file_name)
+                        message.update(message.get() + "\n" + str(i+1) + "/" + str(len(post_urls_array)) + ": " + file_name)
+                        window.refresh()
+
+                message.update(message.get() + "\nDone downloading " + str(len(post_urls_array)) + " link(s)")
             except IndexError as eIndex:
                 print("IndexError: " + str(eIndex))
                 message.update("IndexError: " + str(eIndex))
+                window.refresh()
             except TypeError as eType: 
                 print("TypeError: " + str(eType))
                 message.update("TypeError: " + str(eType))
+                window.refresh()
                 sg.popup_error_with_traceback(f'An error happened.  Here is the info:', eType)
             except UnicodeEncodeError as eUnicodeEncode:
                 print("UnicodeEncodeError: " + str(eUnicodeEncode))
                 message.update("UnicodeEncodeError: " + str(eUnicodeEncode))
+                window.refresh()
             except AttributeError as eAttributeError:
                 print("AttributeError: " + str(eAttributeError))
                 message.update("AttributeError: " + str(eAttributeError))
+                window.refresh()
             except Exception as eXception:
                 print("Exception: ", str(eXception))
                 message.update("Exception: ", str(eXception))
+                window.refresh()
                 sg.popup_error_with_traceback(f'An error happened.  Here is the info:', eXception)
+
+        window.refresh()
 
     # Close the window once loop is broken.
     window.close()
