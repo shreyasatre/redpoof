@@ -320,7 +320,7 @@ def make_html(reddit_post:RedditPost):
     # score
     div_score = span(_class="item")
     div_score += span(raw(get_icons_svg("thumb_up")), _class="item-icon")
-    div_score += span(str(reddit_post.score) + " @ " + str(reddit_post.upvote_ratio) + "%", _class="item-text")
+    div_score += span(str(reddit_post.score) + " @ " + str(reddit_post.upvote_ratio * 100) + "%", _class="item-text")
 
     div_details.add(div_author)
     div_details.add(div_subreddit)
