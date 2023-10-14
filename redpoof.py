@@ -1,3 +1,4 @@
+# Imports.
 import configparser
 import os
 import datetime
@@ -5,12 +6,17 @@ import praw
 import markdown
 import dominate
 import PySimpleGUI as sg
+import readtime
+# ---
 
+# Froms.
 from pathvalidate import sanitize_filename
 from mdutils.mdutils import MdUtils
 from dominate.tags import *
 from dominate.util import raw
+# ---
 
+# Structures.
 class RedditPost:
     def __init__(self) -> None:
         self.title = ""
@@ -312,7 +318,7 @@ def make_html(reddit_post:RedditPost):
     div_subreddit += span(raw(get_icons_svg("reddit")), _class="item-icon")
     div_subreddit += span(reddit_post.sub_name, _class="item-text")
 
-    # timer
+    # timestamp
     div_timestamp = span(_class="item")
     div_timestamp += span(raw(get_icons_svg("calendar_clock")), _class="item-icon")
     div_timestamp += span(reddit_post.timestamp, _class="item-text")
@@ -322,10 +328,16 @@ def make_html(reddit_post:RedditPost):
     div_score += span(raw(get_icons_svg("thumb_up")), _class="item-icon")
     div_score += span(str(reddit_post.score) + " @ " + str(reddit_post.upvote_ratio * 100) + "%", _class="item-text")
 
+    # Create the <span/> that will contain the read time of the post.
+    div_timer = span(_class="item")
+    div_timer += span(raw(get_icons_svg("timer")), _class="item-icon")
+    div_timer += span(str(readtime.of_markdown(reddit_post.selftext)), _class="item-text")
+
     div_details.add(div_author)
     div_details.add(div_subreddit)
     div_details.add(div_timestamp)
     div_details.add(div_score)
+    div_details.add(div_timer)
 
     # details
     d += div_details
@@ -337,7 +349,7 @@ def make_html(reddit_post:RedditPost):
     d += div_selftext
 
     div_comments = div(_class="comments")
-    div_comments.add(h3("Comments", _class="comments-main-header"))
+    div_comments.add(h3("Comments (%s)" %(str(len(reddit_post.comments))), _class="comments-main-header"))
 
     # comments
     for comment in reddit_post.comments:
