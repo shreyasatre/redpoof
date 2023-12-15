@@ -19,5 +19,6 @@ This library proved to be a game-changer, providing the capability to access a w
 In this project there are three main modules of the app :
 
 1. Access the reddit post
-2. Process the data associated with the post
-3. Export the content to a simple HTML file
+   ![Module 1]([http://url/to/img.png](https://assets-global.website-files.com/63402a8bbd098358bb9773a4/6515ac419b04859ca5b43170_Screenshot%202023-09-28%20at%2012.36.40%20PM.png)https://assets-global.website-files.com/63402a8bbd098358bb9773a4/6515ac419b04859ca5b43170_Screenshot%202023-09-28%20at%2012.36.40%20PM.png)
+3. Process the data associated with the post
+4. Export the content to a simple HTML file
