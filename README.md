@@ -22,5 +22,12 @@ In this project there are three main modules of the app :
 3. Process the data associated with the post
 4. Export the content to a simple HTML file
 
+#### Interface
+
 ![alt text](https://assets-global.website-files.com/63402a8bbd098358bb9773a4/6515e92be62346dabb60ab02_gui-redpoof.jpg)
+
+#### Output
+
+![alt text](https://assets-global.website-files.com/63402a8bbd098358bb9773a4/6515f90ce75120d40d0402a6_Group%207.jpg)
+
    
