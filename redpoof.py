@@ -233,8 +233,8 @@ def get_window_layout():
     layout = [  [sg.Text("Links to reddit posts")],
                 [sg.Multiline(key="-INPUTURLS-", tooltip=" One link per line ", size=(73,10), autoscroll=True)], 
                 [sg.Push(), sg.Button("Download"), sg.Button("Exit")],
-                [sg.Multiline("", size=(85,3), key="-MESSAGE-", 
-                 disabled=True, autoscroll=True, background_color="#eee", font=("Consolas", 8))] ]
+                [sg.Multiline("", size=(85,5), key="-MESSAGE-", 
+                 disabled=True, autoscroll=True, font=("Consolas", 8))] ]
 
     return layout
 # ---
@@ -427,8 +427,9 @@ def main():
 
     post_urls_array = []
 
+    sg.theme("DarkTeal9")
     # Create the window.
-    window = sg.Window("Download reddit post", get_window_layout(), finalize=True)
+    window = sg.Window("redpoof - red(dit) po(st) of(fline)", get_window_layout(), finalize=True)
     message = window["-MESSAGE-"]
     message.update("Ready...")
     window.refresh()
